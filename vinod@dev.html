@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>vinod@dev — Vinod V</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://unpkg.com/@vscode/codicons@0.0.36/dist/codicon.css" rel="stylesheet" />
+<style>
+  html,body{margin:0;height:100%;background:#0a0c0f;color:#e5e3dc;
+    font-family:'Inter',ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+  #root{height:100%}
+  .cli-mono{font-family:'JetBrains Mono','IBM Plex Mono',ui-monospace,Menlo,monospace;
+    font-feature-settings:"liga" 0, "calt" 0}
+  .cli-line{white-space:pre-wrap;word-break:break-word}
+  .cli-cursor{display:inline-block;width:.55em;height:1.05em;vertical-align:-2px;
+    margin-left:1px;animation:cli-blink 1s steps(1,end) infinite}
+  @keyframes cli-blink{0%,55%{opacity:1}60%,100%{opacity:0}}
+  .cli-chip{appearance:none;border:1px solid rgba(255,255,255,.18);background:transparent;
+    color:inherit;font-family:inherit;font-size:12.5px;padding:1px 8px;border-radius:3px;
+    cursor:pointer;transition:background .12s,border-color .12s,color .12s}
+  .cli-chip:hover{background:var(--acc,#7ed957);color:#0a0c0f;border-color:var(--acc,#7ed957)}
+  .ide-close{transition:background .12s,opacity .12s}
+  .ide-close:hover{background:rgba(255,255,255,.1);opacity:1!important}
+  /* CRT effect — same as wireframes */
+  .wf-crt{position:relative}
+  .wf-crt::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0,rgba(0,0,0,.18) 1px,transparent 1px,transparent 3px);
+    mix-blend-mode:multiply;z-index:1}
+  .wf-crt::before{content:'';position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.45) 100%);z-index:1}
+  /* mode-transition fade */
+  .mode-fade-enter{opacity:0;transform:scale(.985)}
+  .mode-fade-enter-active{opacity:1;transform:scale(1);transition:opacity .22s,transform .22s}
+  /* link defaults */
+  a{color:inherit}
+  a:hover{filter:brightness(1.1)}
+  /* Selection */
+  ::selection{background:var(--acc,#7ed957);color:#0a0c0f}
+  /* VS Code-style thin scrollbar */
+  .ide-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent}
+  .ide-scroll::-webkit-scrollbar{width:10px;height:10px}
+  .ide-scroll::-webkit-scrollbar-track{background:transparent}
+  .ide-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:0;
+    border:2px solid transparent;background-clip:content-box}
+  .ide-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3);
+    border:2px solid transparent;background-clip:content-box}
+  .ide-scroll::-webkit-scrollbar-corner{background:transparent}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="content.jsx"></script>
+<script type="text/babel" src="cli-engine.jsx"></script>
+<script type="text/babel" src="cli-commands.jsx"></script>
+<script type="text/babel" src="ide-shell.jsx"></script>
+<script type="text/babel" src="chat-panel.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "themeName": "phosphor",
+  "density": "regular",
+  "crt": false,
+  "startMode": "ide"
+}/*EDITMODE-END*/;
+
+const THEMES = {
+  phosphor: { name: 'phosphor', bg: '#0a0c0f', fg: '#e5e3dc', acc: '#7ed957',
+              dim: 'rgba(229,227,220,.55)', path: '#7aa9d8' },
+  amber:    { name: 'amber',    bg: '#0d0a05', fg: '#ffd9a3', acc: '#ffb000',
+              dim: 'rgba(255,217,163,.5)',  path: '#e89060' },
+  mono:     { name: 'mono',     bg: '#0e0e0e', fg: '#dadada', acc: '#dadada',
+              dim: 'rgba(218,218,218,.55)', path: '#9a9a9a' },
+  ice:      { name: 'ice',      bg: '#070b14', fg: '#cee0f5', acc: '#7aa9d8',
+              dim: 'rgba(206,224,245,.5)',  path: '#a8c2dd' },
+  terra:    { name: 'terra',    bg: '#0e0808', fg: '#f1d4c0', acc: '#c46a5a',
+              dim: 'rgba(241,212,192,.5)',  path: '#d89a7a' },
+};
+
+// ── Boot sequence (rendered once at top of CLI) ────────────────────────────
+
+function BootBlock({ theme }) {
+  const dim = theme.dim, fg = theme.fg, acc = theme.acc;
+  const [tick, setTick] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setTick((x) => x + 1), 90);
+    setTimeout(() => clearInterval(t), 800);
+    return () => clearInterval(t);
+  }, []);
+  const lines = [
+    'Last login: ' + new Date().toString().slice(0, 24) + ' on ttys001',
+    '$ ./portfolio',
+    '[ OK ] mounted /home/vinod/about',
+    '[ OK ] mounted /home/vinod/experience  (4 entries)',
+    '[ OK ] loaded skills.json (18 stacks)',
+    '[ OK ] kernel: portfolio v2.0  ·  uptime 7y 4mo',
+  ];
+  const shown = Math.min(lines.length, tick);
+  return (
+    <div className="cli-mono" style={{ marginBottom: 6 }}>
+      {lines.slice(0, shown).map((l, i) => {
+        const isOk = l.startsWith('[ OK ]');
+        const rest = isOk ? l.slice('[ OK ]'.length) : l;
+        return (
+          <div key={i} style={{ color: isOk ? dim : (l.startsWith('$') ? fg : dim) }}>
+            {isOk ? <>[<span style={{ color: acc }}> OK </span>]{rest}</> : l}
+          </div>
+        );
+      })}
+      {/* ASCII banner (always shown after boot) */}
+      <pre style={{ margin: '12px 0 6px', color: acc, fontSize: 11.5, lineHeight: 1.05 }}>
+{`┌─────────────────────────────────────────────────────────────┐
+│   __     __ _                  _   __     __                │
+│   \\ \\   / /(_) _ __    ___  __| |  \\ \\   / /                │
+│    \\ \\ / / | || '_ \\  / _ \\/ _\` |   \\ \\ / /                 │
+│     \\ V /  | || | | || (_) | (_| |    \\ V /                 │
+│      \\_/   |_||_| |_| \\___/ \\__,_|     \\_/                  │
+│                                                             │
+│   Senior Software Engineer · Hyderabad, IN · 7+ yrs         │
+└─────────────────────────────────────────────────────────────┘`}
+      </pre>
+      <div style={{ color: dim, marginTop: 4 }}>
+        type <span style={{ color: acc }}>help</span> to get started · click any chip to run · <span style={{ color: acc }}>tab</span> to autocomplete · <span style={{ color: acc }}>↑↓</span> for history
+      </div>
+    </div>
+  );
+}
+
+// ── App ────────────────────────────────────────────────────────────────────
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [mode, setMode] = React.useState(t.startMode || 'cli'); // 'cli' | 'ide'
+  const theme = THEMES[t.themeName] || THEMES.phosphor;
+
+  // Push --acc to :root so child stylesheets (cli-chip hover, status bar) pick it up.
+  React.useEffect(() => {
+    document.documentElement.style.setProperty('--acc', theme.acc);
+  }, [theme.acc]);
+
+  // Single CLI engine instance — shared between fullscreen CLI mode and the
+  // IDE's integrated terminal panel so history + state stays continuous.
+  const cli = useCli({
+    theme,
+    setMode,
+    setTheme: (name) => setTweak('themeName', name),
+  });
+
+  return (
+    <>
+      {mode === 'cli' ? (
+        <CliTerminal
+          cli={cli}
+          theme={theme}
+          density={t.density}
+          crt={t.crt}
+          bootLines={<BootBlock theme={theme} />}
+        />
+      ) : (
+        <IdeShell
+          theme={theme}
+          density={t.density}
+          crt={t.crt}
+          cli={cli}
+          onExit={() => setMode('cli')}
+        />
+      )}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Theme" />
+        <TweakSelect label="Color" value={t.themeName}
+          options={['phosphor','amber','mono','ice','terra']}
+          onChange={(v) => setTweak('themeName', v)} />
+        <TweakRadio  label="Density" value={t.density}
+          options={['compact','regular','comfy']}
+          onChange={(v) => setTweak('density', v)} />
+        <TweakToggle label="CRT effect" value={t.crt}
+          onChange={(v) => setTweak('crt', v)} />
+        <TweakSection label="Mode" />
+        <TweakRadio  label="View" value={mode}
+          options={['cli','ide']}
+          onChange={(v) => setMode(v)} />
+        <TweakSection label="Try" />
+        <TweakButton label="run: sudo hire-me" onClick={() => {
+          if (mode !== 'cli') setMode('cli');
+          setTimeout(() => cli.typeAndRun('sudo hire-me'), 200);
+        }} />
+        <TweakButton label="run: matrix" secondary
+          onClick={() => {
+            if (mode !== 'cli') setMode('cli');
+            setTimeout(() => cli.typeAndRun('matrix'), 200);
+          }} />
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>
