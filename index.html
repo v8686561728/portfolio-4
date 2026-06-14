@@ -10,7 +10,9 @@
 <link href="https://unpkg.com/@vscode/codicons@0.0.36/dist/codicon.css" rel="stylesheet" />
 <style>
   html,body{margin:0;height:100%;background:#0a0c0f;color:#e5e3dc;
-    font-family:'Inter',ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+    font-family:'Inter',ui-sans-serif,system-ui,sans-serif;overflow:hidden;
+    position:fixed;width:100%}
+  @media(hover:none){body{position:fixed;width:100%;height:-webkit-fill-available}}
   #root{height:100%}
   .cli-mono{font-family:'JetBrains Mono','IBM Plex Mono',ui-monospace,Menlo,monospace;
     font-feature-settings:"liga" 0, "calt" 0}
@@ -48,6 +50,28 @@
   .ide-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3);
     border:2px solid transparent;background-clip:content-box}
   .ide-scroll::-webkit-scrollbar-corner{background:transparent}
+
+  /* Responsive */
+  .cli-root pre{overflow-x:auto;max-width:100%}
+  .cli-game-board{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  .cli-game-board pre{display:inline-block;min-width:0}
+  button,.cli-chip,.twk-btn,.twk-toggle,.twk-seg button{cursor:pointer!important}
+  @media(hover:none){
+    ::-webkit-scrollbar{width:4px!important;height:4px!important}
+    .cli-chip{min-height:28px;display:inline-flex;align-items:center}
+    .cli-root{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  }
+
+  @media(max-width:639px){
+    .cli-chip{font-size:11px!important;padding:0 6px!important}
+    .cli-mono{font-size:12px!important}
+  }
+  @media(max-width:767px){
+    .ide-hide-mobile{display:none!important}
+    .ide-stack-mobile{grid-template-columns:36px 0 1fr!important}
+    .ide-full-mobile{position:fixed!important;inset:0!important;z-index:100!important;width:100%!important}
+    .ide-chat-mobile{position:fixed!important;inset:0!important;z-index:100!important;width:100%!important;border-left:none!important}
+  }
 </style>
 </head>
 <body>
@@ -119,6 +143,7 @@ function BootBlock({ theme }) {
         );
       })}
       {/* ASCII banner (always shown after boot) */}
+      <div style={{ overflowX: 'auto', maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
       <pre style={{ margin: '12px 0 6px', color: acc, fontSize: 11.5, lineHeight: 1.05 }}>
 {`┌─────────────────────────────────────────────────────────────┐
 │   __     __ _                  _   __     __                │
@@ -130,6 +155,7 @@ function BootBlock({ theme }) {
 │   Senior Software Engineer · Hyderabad, IN · 7+ yrs         │
 └─────────────────────────────────────────────────────────────┘`}
       </pre>
+      </div>
       <div style={{ color: dim, marginTop: 4 }}>
         type <span style={{ color: acc }}>help</span> to get started · click any chip to run · <span style={{ color: acc }}>tab</span> to autocomplete · <span style={{ color: acc }}>↑↓</span> for history
       </div>

@@ -276,9 +276,10 @@ function NeofetchOutput() {
    _ | |    | | | | | |  \\| | | | | | | |
   | || |_   | | | |_| | |\\  | |_| | |_| |
    \\___(_)  |_| |____/|_| \\_|\\___/|____/`;
+  const isMobile = window.innerWidth < 640;
   return (
-    <Out style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 24 }}>
-      <pre style={{ margin: 0, color: 'var(--acc)', fontSize: 10.5, lineHeight: 1.05 }}>{ascii}</pre>
+    <Out style={{ display: isMobile ? 'block' : 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 24 }}>
+      <pre style={{ margin: 0, color: 'var(--acc)', fontSize: 10.5, lineHeight: 1.05, overflowX: 'auto', maxWidth: '100%' }}>{ascii}</pre>
       <div style={{ lineHeight: 1.6 }}>
         <div><Bold c="var(--acc)">{V.name.toLowerCase().replace(' ', '')}</Bold>@<Bold c="var(--acc)">portfolio</Bold></div>
         <Dim>{'─'.repeat(28)}</Dim>
@@ -557,7 +558,7 @@ function SnakeGame() {
         <span><Dim>hi: </Dim>{hiScore}</span>
         {phase === 'playing' && <span style={{ marginLeft: 'auto', opacity: .55 }}>WASD · clear to quit</span>}
       </div>
-      <pre style={{ margin: 0, lineHeight: 1.3, fontSize: 13 }}>{buildSnakeBoard()}</pre>
+      <div className="cli-game-board"><pre style={{ margin: 0, lineHeight: 1.3, fontSize: 13 }}>{buildSnakeBoard()}</pre></div>
       {phase === 'dead' && (
         <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 12 }}>
           <Bold c="#ff6a5e">GAME OVER</Bold>
@@ -751,7 +752,7 @@ function TetrisGame() {
   return (
     <Out style={{ userSelect: 'none' }}>
       <Bold c="var(--acc)">TETRIS</Bold>
-      <pre style={{ margin: '2px 0 0', lineHeight: 1.3, fontSize: 13 }}>{buildTetrisBoard()}</pre>
+      <div className="cli-game-board"><pre style={{ margin: '2px 0 0', lineHeight: 1.3, fontSize: 13 }}>{buildTetrisBoard()}</pre></div>
       {phase === 'idle' && <div style={{ marginTop: 4, opacity: .55 }}>press WASD or Space to start</div>}
       {phase === 'over' && (
         <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -936,13 +937,13 @@ function BrickBreaker() {
   const livesStr = '♥'.repeat(Math.max(0, livesR.current)) + '♡'.repeat(Math.max(0, 3 - livesR.current));
   return (
     <Out style={{ userSelect: 'none' }}>
-      <div style={{ display: 'flex', gap: 16, marginBottom: 2, alignItems: 'baseline' }}>
+      <div style={{ display: 'flex', gap: 16, marginBottom: 2, alignItems: 'baseline', flexWrap: 'wrap' }}>
         <Bold c="var(--acc)">BREAKOUT</Bold>
         <span><Dim>score: </Dim>{score}</span>
         <span style={{ color: '#ff6a5e' }}>{livesStr}</span>
-        {phase === 'playing' && !serveRef.current && <span style={{ marginLeft: 'auto', opacity: .55 }}>A/D · ←→ · clear to quit</span>}
+        {phase === 'playing' && !serveRef.current && <span style={{ marginLeft: 'auto', opacity: .55, fontSize: 11 }}>A/D · ←→</span>}
       </div>
-      <pre style={{ margin: 0, lineHeight: 1.3, fontSize: 13 }}>{buildBBBoard()}</pre>
+      <div className="cli-game-board"><pre style={{ margin: 0, lineHeight: 1.3, fontSize: 13 }}>{buildBBBoard()}</pre></div>
       {(phase === 'won' || phase === 'lost') && (
         <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 12 }}>
           {phase === 'won' ? <Bold c="var(--acc)">YOU WIN!</Bold> : <Bold c="#ff6a5e">GAME OVER</Bold>}

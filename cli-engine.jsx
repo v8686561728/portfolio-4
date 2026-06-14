@@ -182,27 +182,41 @@ function CliTerminal({
   const focus = () => inputRef.current && inputRef.current.focus();
   React.useEffect(() => { focus(); }, []);
 
-  const pad = density === 'compact' ? 14 : density === 'comfy' ? 28 : 20;
+  const [vw] = React.useState(() => window.innerWidth);
+  React.useEffect(() => {
+    const onResize = () => {
+      // trigger re-render via state update
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  const isMobile = window.innerWidth < 640;
+  const isSmall = window.innerWidth < 768;
+  const pad = density === 'compact' ? (isMobile ? 10 : 14) : density === 'comfy' ? (isMobile ? 16 : 28) : (isMobile ? 12 : 20);
+  const fontSize = isMobile ? 12 : isSmall ? 12.5 : 13.5;
 
   return (
     <CliCtx.Provider value={cli}>
       <div
         onClick={focus}
+        onTouchStart={focus}
         className={crt ? 'wf-crt cli-root' : 'cli-root'}
         style={{
           position: 'relative', width: '100%', height: '100%',
           background: theme.bg, color: theme.fg,
           fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,Menlo,monospace",
-          fontSize: 13.5, lineHeight: 1.55,
+          fontSize, lineHeight: 1.55,
           overflow: 'hidden',
+          overscrollBehavior: 'contain',
         }}>
         <div ref={wrapRef}
              className="ide-scroll"
              style={{
                position: 'absolute', inset: 0,
                padding: pad, paddingTop: pad - 4,
-               overflowY: 'auto', overflowX: 'hidden',
+               overflowY: 'auto', overflowX: 'auto',
                scrollBehavior: 'smooth',
+               WebkitOverflowScrolling: 'touch',
              }}>
           {/* boot lines (rendered once at top) */}
           {bootLines}
@@ -240,10 +254,12 @@ function CliTerminal({
           onBlur={() => { setFocused(false); onFocusChange && onFocusChange(false); }}
           spellCheck={false} autoCapitalize="off" autoComplete="off" autoCorrect="off"
           aria-label="terminal input"
+          inputMode="text"
           style={{
-            position: 'absolute', left: -9999, top: 0,
+            position: 'fixed', left: 0, bottom: 0,
             width: 1, height: 1, opacity: 0,
             border: 0, padding: 0, background: 'transparent',
+            pointerEvents: 'none',
           }} />
       </div>
     </CliCtx.Provider>

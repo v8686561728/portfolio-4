@@ -311,7 +311,7 @@ function ChatSidebar({ theme, onClose }) {
           <textarea
             ref={inputRef}
             value={input}
-            rows={3}
+            rows={2}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
             placeholder="Ask Copilot…  (Enter to send)"
@@ -319,7 +319,7 @@ function ChatSidebar({ theme, onClose }) {
               display: 'block', width: '100%', background: 'transparent',
               color: fg, border: 'none', outline: 'none', resize: 'none',
               padding: '8px 10px', fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 12, lineHeight: 1.55, boxSizing: 'border-box',
+              fontSize: 13, lineHeight: 1.55, boxSizing: 'border-box',
             }}
           />
           <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 8px 6px' }}>
@@ -327,8 +327,8 @@ function ChatSidebar({ theme, onClose }) {
               onClick={() => send()}
               disabled={loading || !input.trim()}
               className="cli-chip"
-              style={{ fontSize: 11.5, padding: '3px 12px', opacity: (!input.trim() || loading) ? .35 : 1, fontFamily: 'inherit' }}>
-              <i className="codicon codicon-send" style={{ fontSize: 11, marginRight: 4, verticalAlign: 'middle' }} />
+              style={{ fontSize: 12, padding: '6px 16px', opacity: (!input.trim() || loading) ? .35 : 1, fontFamily: 'inherit' }}>
+              <i className="codicon codicon-send" style={{ fontSize: 12, marginRight: 4, verticalAlign: 'middle' }} />
               Send
             </button>
           </div>

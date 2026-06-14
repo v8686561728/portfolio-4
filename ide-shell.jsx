@@ -35,7 +35,7 @@ const Prop = ({ p }) => <span style={{ color: '#9cdcfe' }}>{p}</span>;
 
 // ── Shared markdown helpers ────────────────────────────────────────────────
 
-const Md  = ({ children, style }) => <div style={{ lineHeight: 1.7, fontSize: 14, ...style }}>{children}</div>;
+const Md  = ({ children, style }) => <div style={{ lineHeight: 1.7, fontSize: 14, overflowWrap: 'break-word', wordBreak: 'break-word', ...style }}>{children}</div>;
 const H1  = ({ children }) => <div style={{ color: '#9aaec9', fontSize: 18, marginBottom: 4 }}># {children}</div>;
 const H2  = ({ children }) => <div style={{ color: '#9aaec9', marginTop: 14, marginBottom: 4 }}>## {children}</div>;
 const Tag = ({ children }) => (
@@ -49,16 +49,17 @@ const Tag = ({ children }) => (
 
 function FileHome() {
   const V = window.VINOD;
+  const isMobile = window.innerWidth < 640;
   return (
-    <div style={{ padding: '52px 48px', maxWidth: 740 }}>
-      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: 'rgba(212,210,203,.38)', marginBottom: 22 }}>
+    <div style={{ padding: isMobile ? '24px 20px' : '52px 48px', maxWidth: 740 }}>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: isMobile ? 11 : 13, color: 'rgba(212,210,203,.38)', marginBottom: 22 }}>
         {'// portfolio / home.tsx'}
       </div>
-      <div style={{ fontSize: 14, color: 'rgba(212,210,203,.55)', marginBottom: 10, fontFamily: "'Inter',sans-serif" }}>Hi all. I am</div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 52, fontWeight: 700, color: '#d4d2cb', letterSpacing: '-.02em', lineHeight: 1.05, fontFamily: "'Inter',sans-serif" }}>
+      <div style={{ fontSize: isMobile ? 12 : 14, color: 'rgba(212,210,203,.55)', marginBottom: 10, fontFamily: "'Inter',sans-serif" }}>Hi all. I am</div>
+      <h1 style={{ margin: '0 0 8px', fontSize: isMobile ? 32 : 52, fontWeight: 700, color: '#d4d2cb', letterSpacing: '-.02em', lineHeight: 1.05, fontFamily: "'Inter',sans-serif" }}>
         {V.name}
       </h1>
-      <div style={{ fontSize: 26, color: 'var(--acc)', marginBottom: 36, fontFamily: "'JetBrains Mono',monospace" }}>
+      <div style={{ fontSize: isMobile ? 18 : 26, color: 'var(--acc)', marginBottom: 36, fontFamily: "'JetBrains Mono',monospace" }}>
         &gt; {V.role}
       </div>
 
@@ -102,11 +103,12 @@ function FileHome() {
 
 function FileAbout() {
   const V = window.VINOD;
+  const isMobile = window.innerWidth < 640;
   return (
-    <Md>
+    <Md style={isMobile ? { fontSize: 13, paddingRight: 8 } : {}}>
       <H1>About</H1>
       <div style={{ opacity: .7, marginBottom: 10 }}>&gt; {V.role} · {V.location} · {V.yearsExp} yrs</div>
-      <p style={{ margin: '0 0 16px', maxWidth: '70ch' }}>{V.summary}</p>
+      <p style={{ margin: '0 0 16px', maxWidth: '70ch', wordBreak: 'break-word' }}>{V.summary}</p>
       <H2>links</H2>
       <div style={{ marginBottom: 12 }}>
         · <a href={`mailto:${V.email}`} style={{ color: 'var(--acc)' }}>{V.email}</a><br />
@@ -304,32 +306,34 @@ function FileRow({ f, depth, active, acc, onOpen }) {
 
 // ── Titlebar ───────────────────────────────────────────────────────────────
 
-function Titlebar({ activeId }) {
+function Titlebar({ activeId, isMobile }) {
   const f = FILE_BY_ID[activeId];
   const title = f ? `${f.path} — vinod@dev` : 'vinod@dev';
-  const menus = ['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'];
+  const menus = isMobile ? ['File', 'Help'] : ['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'];
   return (
     <div style={{
       gridRow: 1, gridColumn: '1 / -1',
       background: '#1f2428',
       display: 'flex', alignItems: 'center',
-      fontSize: 12, color: 'rgba(212,210,203,.7)',
+      fontSize: isMobile ? 11 : 12, color: 'rgba(212,210,203,.7)',
       userSelect: 'none', zIndex: 10, flexShrink: 0,
     }}>
       <div style={{ display: 'flex', flexShrink: 0 }}>
         {menus.map((m) => (
           <div key={m}
-            style={{ padding: '0 10px', height: 30, display: 'flex', alignItems: 'center', cursor: 'default' }}
+            style={{ padding: isMobile ? '0 6px' : '0 10px', height: isMobile ? 28 : 30, display: 'flex', alignItems: 'center', cursor: 'default' }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,.08)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
             {m}
           </div>
         ))}
       </div>
-      <div style={{
-        position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-        color: 'rgba(212,210,203,.45)', fontSize: 12, pointerEvents: 'none', whiteSpace: 'nowrap',
-      }}>{title}</div>
+      {!isMobile && (
+        <div style={{
+          position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+          color: 'rgba(212,210,203,.45)', fontSize: 12, pointerEvents: 'none', whiteSpace: 'nowrap',
+        }}>{title}</div>
+      )}
     </div>
   );
 }
@@ -346,6 +350,8 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
   const [palQuery, setPalQuery]         = React.useState('');
   const [palIdx, setPalIdx]             = React.useState(0);
   const [chatOpen, setChatOpen] = React.useState(false);
+  const [explorerOpen, setExplorerOpen] = React.useState(true);
+  const [sidebarOpen, setSidebarOpen]   = React.useState(false); // mobile sidebar overlay
 
   // expose openFile for home-page buttons
   React.useEffect(() => {
@@ -369,9 +375,12 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
     e.preventDefault();
     const startY = e.clientY, startH = termHeight;
     const onMove = (ev) => setTermHeight(Math.max(80, Math.min(600, startH + (startY - ev.clientY))));
-    const onUp   = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    const onUp   = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   };
 
   React.useEffect(() => {
@@ -397,29 +406,32 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
   const dim = 'rgba(212,210,203,.55)';
 
   const activeFile = FILE_BY_ID[activeId];
+  const isMobile = window.innerWidth < 768;
 
   return (
-    <div style={{
+    <div className={isMobile ? 'ide-stack-mobile' : ''} style={{
       position: 'relative', width: '100%', height: '100%',
       background: '#1a1c20', color: fg, overflow: 'hidden',
-      fontFamily: "'JetBrains Mono',monospace", fontSize: 13,
+      fontFamily: "'JetBrains Mono',monospace", fontSize: isMobile ? 12 : 13,
       display: 'grid',
-      gridTemplateColumns: `44px 240px 1fr${chatOpen ? ' 280px' : ''}`,
-      gridTemplateRows: '30px 32px 1fr 22px',
+      gridTemplateColumns: isMobile
+        ? `36px ${explorerOpen && sidebarOpen ? '200px' : '0px'} 1fr${chatOpen ? ' 100%' : ''}`
+        : `44px ${explorerOpen ? '240px' : '0px'} 1fr${chatOpen ? ' 280px' : ''}`,
+      gridTemplateRows: isMobile ? '28px 28px 1fr 20px' : '30px 32px 1fr 22px',
     }}>
 
       {/* ── Titlebar ── */}
-      <Titlebar activeId={activeId} />
+      <Titlebar activeId={activeId} isMobile={isMobile} />
 
       {/* ── Activity bar ── */}
       <div style={{
         gridRow: '2 / 4', gridColumn: 1,
         background: '#15171a', borderRight: '1px solid rgba(0,0,0,.4)',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        padding: '10px 0', gap: 6, color: dim,
+        padding: isMobile ? '4px 0' : '10px 0', gap: isMobile ? 2 : 6, color: dim,
       }}>
         {[
-          { icon: 'codicon-files',          label: 'Explorer',       sel: true,      onClick: null               },
+          { icon: 'codicon-files',          label: 'Explorer',       sel: false,      onClick: () => { if (isMobile) { setSidebarOpen(s => !s); } else { setExplorerOpen(e => !e); } } },
           { icon: 'codicon-search',         label: 'Search',         sel: false,     onClick: null               },
           { icon: 'codicon-source-control', label: 'Source Control', sel: false,     onClick: null               },
           { icon: 'codicon-extensions',     label: 'Extensions',     sel: false,     onClick: null               },
@@ -427,34 +439,45 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
         ].map(({ icon, label, sel, onClick }) => (
           <div key={label} title={label} onClick={onClick || undefined}
             style={{
-              width: 44, height: 44, display: 'grid', placeItems: 'center',
+              width: isMobile ? 36 : 44, height: isMobile ? 36 : 44, display: 'grid', placeItems: 'center',
               borderLeft: sel ? `2px solid ${acc}` : '2px solid transparent',
               color: sel ? fg : dim, cursor: onClick ? 'pointer' : 'default',
             }}
             onMouseEnter={e => { if (onClick && !sel) e.currentTarget.style.color = 'rgba(212,210,203,.85)'; }}
             onMouseLeave={e => { if (!sel) e.currentTarget.style.color = dim; }}>
-            <i className={`codicon ${icon}`} style={{ fontSize: 22 }} />
+            <i className={`codicon ${icon}`} style={{ fontSize: isMobile ? 18 : 22 }} />
           </div>
         ))}
         <div style={{ flex: 1 }} />
         <div onClick={onExit} title="$ vinod@dev  (secret terminal)" style={{
-          width: 44, height: 44, display: 'grid', placeItems: 'center',
+          width: isMobile ? 36 : 44, height: isMobile ? 36 : 44, display: 'grid', placeItems: 'center',
           color: dim, cursor: 'pointer',
         }}>
-          <i className="codicon codicon-terminal" style={{ fontSize: 22 }} />
+          <i className="codicon codicon-terminal" style={{ fontSize: isMobile ? 18 : 22 }} />
         </div>
       </div>
 
       {/* ── Explorer sidebar ── */}
-      <div style={{
+      {isMobile && sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90 }} />
+      )}
+      <div className={!explorerOpen ? 'ide-hide-mobile' : ''} style={{
         gridRow: '2 / 4', gridColumn: 2,
         background: '#1e2024', borderRight: '1px solid rgba(0,0,0,.4)',
         display: 'flex', flexDirection: 'column', minHeight: 0,
+        ...(isMobile && sidebarOpen ? { position: 'fixed', left: 36, top: 0, bottom: 0, width: 220, zIndex: 91, borderLeft: '1px solid rgba(0,0,0,.4)' } : {}),
+        ...(isMobile && !sidebarOpen ? { display: 'none' } : {}),
       }}>
         <div style={{
           padding: '8px 14px', fontSize: 10.5,
           letterSpacing: '.12em', color: dim, textTransform: 'uppercase',
-        }}>Explorer</div>
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span>Explorer</span>
+          {isMobile && (
+            <span onClick={() => setSidebarOpen(false)} style={{ cursor: 'pointer', opacity: .6, fontSize: 14 }}>✕</span>
+          )}
+        </div>
         <div className="ide-scroll" style={{ padding: '0 0 12px', overflowY: 'auto', flex: 1 }}>
           <div style={{ padding: '2px 8px', fontSize: 11, color: dim, textTransform: 'uppercase', letterSpacing: '.08em' }}>
             ▾ vinod-portfolio
@@ -462,24 +485,24 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
           <FolderRow name="about" open={folders.about}
             onClick={() => setFolders((f) => ({ ...f, about: !f.about }))} />
           {folders.about && FILES.filter((f) => f.group === 'about').map((f) => (
-            <FileRow key={f.id} f={f} depth={1} active={f.id === activeId} acc={acc} onOpen={openFile} />
+            <FileRow key={f.id} f={f} depth={1} active={f.id === activeId} acc={acc} onOpen={(id) => { openFile(id); if (isMobile) setSidebarOpen(false); }} />
           ))}
           <FolderRow name="projects" open={folders.projects}
             onClick={() => setFolders((f) => ({ ...f, projects: !f.projects }))} />
           {folders.projects && FILES.filter((f) => f.group === 'projects').map((f) => (
-            <FileRow key={f.id} f={f} depth={1} active={f.id === activeId} acc={acc} onOpen={openFile} />
+            <FileRow key={f.id} f={f} depth={1} active={f.id === activeId} acc={acc} onOpen={(id) => { openFile(id); if (isMobile) setSidebarOpen(false); }} />
           ))}
           {FILES.filter((f) => f.group === 'root').map((f) => (
-            <FileRow key={f.id} f={f} depth={0} active={f.id === activeId} acc={acc} onOpen={openFile} />
+            <FileRow key={f.id} f={f} depth={0} active={f.id === activeId} acc={acc} onOpen={(id) => { openFile(id); if (isMobile) setSidebarOpen(false); }} />
           ))}
         </div>
       </div>
 
       {/* ── Tab bar ── */}
-      <div style={{
+      <div className="ide-scroll" style={{
         gridRow: 2, gridColumn: 3,
         background: '#15171a', borderBottom: '1px solid rgba(0,0,0,.4)',
-        display: 'flex', alignItems: 'stretch', overflow: 'hidden',
+        display: 'flex', alignItems: 'stretch', overflowX: 'auto', overflowY: 'hidden',
       }}>
         {openTabs.map((id) => {
           const f = FILE_BY_ID[id];
@@ -519,15 +542,15 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
           <div style={{ display: 'flex', minHeight: '100%', alignItems: 'flex-start' }}>
             {/* line gutter */}
             <div style={{
-              flex: '0 0 auto', padding: '14px 10px 14px 8px', textAlign: 'right',
-              color: 'rgba(212,210,203,.22)', fontSize: 12, lineHeight: 1.7,
-              userSelect: 'none', minWidth: 42,
+              flex: '0 0 auto', padding: isMobile ? '10px 6px 10px 4px' : '14px 10px 14px 8px', textAlign: 'right',
+              color: 'rgba(212,210,203,.22)', fontSize: isMobile ? 11 : 12, lineHeight: 1.7,
+              userSelect: 'none', minWidth: isMobile ? 28 : 42,
               fontFamily: "'JetBrains Mono',monospace",
             }}>
               {Array.from({ length: 60 }).map((_, i) => <div key={i}>{i + 1}</div>)}
             </div>
             <div style={{
-              padding: '14px 28px', flex: 1, minWidth: 0, color: fg,
+              padding: isMobile ? '10px 12px' : '14px 28px', flex: 1, minWidth: 0, color: fg,
               fontFamily: ['skills', 'projects', 'contact', 'home'].includes(activeId)
                 ? "'JetBrains Mono',monospace"
                 : "'Inter',ui-sans-serif,system-ui,sans-serif",
@@ -542,8 +565,8 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
         {/* drag handle */}
         {termOpen && (
           <div
-            onMouseDown={onResizeStart}
-            style={{ height: 4, flexShrink: 0, cursor: 'row-resize', background: 'transparent', borderTop: '1px solid rgba(0,0,0,.5)' }}
+            onPointerDown={onResizeStart}
+            style={{ height: isMobile ? 14 : 4, flexShrink: 0, cursor: 'row-resize', touchAction: 'none', background: 'transparent', borderTop: '1px solid rgba(0,0,0,.5)' }}
             onMouseEnter={(e) => e.currentTarget.style.background = acc}
             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
           />
@@ -573,10 +596,11 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
 
       {/* ── Right chat panel ── */}
       {chatOpen && (
-        <div style={{
-          gridRow: '2 / 4', gridColumn: 4,
+        <div className={isMobile ? 'ide-chat-mobile' : ''} style={{
+          gridRow: isMobile ? '1 / -1' : '2 / 4', gridColumn: isMobile ? '1 / -1' : 4,
           borderLeft: '1px solid rgba(0,0,0,.4)',
           display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden',
+          ...(isMobile ? { zIndex: 90 } : {}),
         }}>
           <ChatSidebar theme={theme} onClose={() => setChatOpen(false)} />
         </div>
@@ -587,15 +611,17 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
         gridRow: 4, gridColumn: '1 / -1',
         background: '#14171b', color: 'rgba(212,210,203,.6)',
         borderTop: `1px solid rgba(0,0,0,.5)`,
-        display: 'flex', alignItems: 'center', gap: 16, padding: '0 12px',
-        fontSize: 11, letterSpacing: '.02em',
+        display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 16, padding: '0 6px',
+        fontSize: isMobile ? 10 : 11, letterSpacing: '.02em',
+        overflowX: 'auto', whiteSpace: 'nowrap',
+        WebkitOverflowScrolling: 'touch',
       }}>
         <span>⎇ main</span>
-        <span>⓪ 0 △ 0</span>
+        {!isMobile && <span>⓪ 0 △ 0</span>}
         <span style={{ marginLeft: 'auto' }}>{activeFile?.kind?.toUpperCase() || ''}</span>
-        <span>UTF-8</span>
-        <span>LF</span>
-        <span>vinodgopal.dev</span>
+        <span>{isMobile ? '' : 'UTF-8'}</span>
+        {!isMobile && <span>LF</span>}
+        {!isMobile && <span>vinodgopal.dev</span>}
         <span style={{ cursor: 'pointer' }} onClick={onExit}>$ terminal</span>
       </div>
 
@@ -603,12 +629,14 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
       {palette && (
         <div onClick={() => setPalette(false)} style={{
           position: 'absolute', inset: 0, background: 'rgba(0,0,0,.35)',
-          zIndex: 50, display: 'flex', justifyContent: 'center', paddingTop: 70,
+          zIndex: 50, display: 'flex', justifyContent: 'center', paddingTop: isMobile ? 40 : 70,
+          paddingLeft: isMobile ? 12 : 0, paddingRight: isMobile ? 12 : 0,
         }}>
           <div onClick={(e) => e.stopPropagation()} style={{
-            width: 520, background: '#252830', border: '1px solid rgba(255,255,255,.08)',
+            width: isMobile ? '100%' : 520, maxWidth: 520,
+            background: '#252830', border: '1px solid rgba(255,255,255,.08)',
             borderRadius: 6, boxShadow: '0 14px 40px rgba(0,0,0,.5)',
-            display: 'flex', flexDirection: 'column', maxHeight: 360, overflow: 'hidden',
+            display: 'flex', flexDirection: 'column', maxHeight: isMobile ? '80vh' : 360, overflow: 'hidden',
           }}>
             <input autoFocus value={palQuery}
               onChange={(e) => { setPalQuery(e.target.value); setPalIdx(0); }}
@@ -645,14 +673,16 @@ function IdeShell({ theme, density, crt, cli, onExit }) {
       )}
 
       {/* keybind hints */}
-      <div style={{
-        position: 'absolute', right: chatOpen ? 296 : 12, top: 68, fontSize: 11, color: dim,
-        fontFamily: "'Inter',sans-serif", display: 'flex', gap: 14, pointerEvents: 'none',
-        transition: 'right .15s',
-      }}>
-        <span><kbd style={kbdS}>⌘P</kbd> files</span>
-        <span><kbd style={kbdS}>⌃`</kbd> terminal</span>
-      </div>
+      {!isMobile && (
+        <div style={{
+          position: 'absolute', right: chatOpen ? 296 : 12, top: 68, fontSize: 11, color: dim,
+          fontFamily: "'Inter',sans-serif", display: 'flex', gap: 14, pointerEvents: 'none',
+          transition: 'right .15s',
+        }}>
+          <span><kbd style={kbdS}>⌘P</kbd> files</span>
+          <span><kbd style={kbdS}>⌃`</kbd> terminal</span>
+        </div>
+      )}
     </div>
   );
 }
